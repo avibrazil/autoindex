@@ -68,14 +68,20 @@ class DirList {
 		}
 */
 
+		end($parts);
+		$parts_last_index=key($parts);
+		
 		foreach ($parts as $i => $n) {
 			if ($i == 0) continue;
 			
 			if ($i == 1) $rebuild="/";
+			
+			$modifier="";
+			if ($i == $parts_last_index) $modifier='class="active"';
 
 			$rebuild .= "$n/";
 			$ii=$i-1;
-			$line = "<li><a data-depth=\"$ii\" href=\"$rebuild\">" . DirList::revertSpecialChars($n) . "</a></li>";
+			$line = "<li $modifier><a data-depth=\"$ii\" href=\"$rebuild\">" . DirList::revertSpecialChars($n) . "</a></li>";
 			$breadcrumb.=$line;
 		}
 
@@ -742,6 +748,10 @@ ol.breadcrumb {
 	padding-left: 0;
 	margin-top: 0;
 	background-color: rgba(0,0,0,0); /* transparent background */
+}
+
+.breadcrumb .active a {
+	color: #B3D1EA;
 }
 
 #cse-search-box {
