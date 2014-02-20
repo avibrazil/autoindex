@@ -740,7 +740,12 @@ $ctx->processForm();
 ol.breadcrumb {
 	margin-bottom: 0;
 	padding-left: 0;
-	background-color: rgba(0,0,0,0);
+	margin-top: 0;
+	background-color: rgba(0,0,0,0); /* transparent background */
+}
+
+#cse-search-box {
+	margin-right: .5em;
 }
 
 .page-header {
@@ -873,14 +878,29 @@ footer {
 	
     <header class="container">
       <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
-      	<div class="container">
+		<div class="container-fluid">
 			<div class="navbar-header">
-			  <ol class="breadcrumb">
-				<?= $ctx->breadcrumb() ?>
-			  </ol>
+				<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-elements">
+					<span class="sr-only">Toggle navigation</span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+				</button>
+				<ol class="navbar-text breadcrumb">
+					<?= $ctx->breadcrumb() ?>
+				</ol>
+			</div>
+
+			<div class="collapse navbar-collapse" id="navbar-elements">
+				<form class="navbar-form navbar-right" id="cse-search-box" action="http://google.com/cse" role="search">
+					<input type="hidden" name="cx" value="009840708878432820926:rrni3_nyqj0" />
+					<input type="hidden" name="ie" value="UTF-8" />
+					<input type="text" name="q" size="31" class="form-control" placeholder="Search DK7 music with Google" />
+				</form>
 			</div>
         </div>
       </nav>
+
       <hgroup id="title" class="page-header" style="margin-top: 5em">
 		<h1 <?php $ctx->getLangAttribute('title') ?>><?php
 			if ($title !== NULL) {
