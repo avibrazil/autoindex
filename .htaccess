@@ -1,0 +1,7 @@
+
+# Example .htaccess that should be put on the root of the directory tree that will be browsed by the script.
+# The "/media/autoindex/index.php" is the URI of the script, not the real filesystem address.
+
+<IfModule mod_dir.c>
+    DirectoryIndex /media/autoindex/index.php
+</IfModule> 
