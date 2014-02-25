@@ -774,6 +774,10 @@ footer {
 	background-color: lightyellow !important;
 }
 
+footer.navbar {
+    margin-bottom: 0;
+}
+
 #list li .name {
 	padding-left: .7em;
 }
@@ -1019,7 +1023,7 @@ footer {
   <!-- ###### FOOTER ###### -->
     
     
-    <footer class="well"><div class="container">
+    <footer class="navbar navbar-default navbar-bottom"><div class="container">
 	<?php if ($ctx->publicSite) { ?>
 	  <p id="about" class="lead">Digital K7 is a large music collection well organized and tagged. Ready to be browsed, listened and downloaded as never seen before.</p>
       <div class="row">
