@@ -1258,12 +1258,26 @@ footer.navbar {
 							.addClass('glyphicon glyphicon-fire'))
 						.append(' highlight this item');
                         
-                    var menuItemSnippet=$('<span/>')
+                    var menuItemSnippetShare=$('<span/>')
 						.append($('<span/>')
 							.addClass('glyphicon glyphicon-share-alt'))
 						.append($('<input/>')
                             .attr('type', 'text')
                             .attr('value', '<a href="' + decodeURI(qualifyURL(target)) + '">' + URLtoPrettyPath(qualifyURL(target)) + '</a>')
+                            .focus(function() {
+                                $(this).select();
+                            })
+                        );
+				
+                    var menuItemSnippetHighlightShare=$('<span/>')
+						.append($('<span/>')
+							.addClass('glyphicon glyphicon-share'))
+						.append($('<input/>')
+                            .attr('type', 'text')
+                            .attr('value', '<a href="' + decodeURI(qualifyURL(location.href + "\?highlight=" + window.btoa(index) + "#main-list-" + (parseInt(index)-1).toString())) + '">' + URLtoPrettyPath(qualifyURL(target)) + '</a>')
+                            .focus(function() {
+                                $(this).select();
+                            })
                         );
 				
 					var menu=$('<ul/>').addClass('menu list-unstyled');
@@ -1275,7 +1289,8 @@ footer.navbar {
 						menu.append($('<li/>').append(menuItemPlay));
 					
 					menu.append($('<li/>').append(menuItemHighlight));
-					menu.append($('<li/>').append(menuItemSnippet));
+					menu.append($('<li/>').append(menuItemSnippetShare));
+					menu.append($('<li/>').append(menuItemSnippetHighlightShare));
 						
 					$(selected).popover({content: menu, html: true, trigger: 'manual'}).popover('show');
 					$(selected).addClass('popover-enabled');
