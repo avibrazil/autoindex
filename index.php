@@ -15,6 +15,7 @@ class DirList {
 		$this->script_location = str_replace("index.php", "", $_SERVER["PHP_SELF"]); 
 
 		if (strpos($_SERVER['SERVER_NAME'],$this->publicHost) !== FALSE) {
+            // if we are on the public host...
 			$this->root = $this->publicHostRoot;
 			$this->rootAlias = $this->publicHostRootAlias;
 			$this->publicSite = TRUE;
@@ -1256,6 +1257,14 @@ footer.navbar {
 						.append($('<span/>')
 							.addClass('glyphicon glyphicon-fire'))
 						.append(' highlight this item');
+                        
+                    var menuItemSnippet=$('<span/>')
+						.append($('<span/>')
+							.addClass('glyphicon glyphicon-share-alt'))
+						.append($('<input/>')
+                            .attr('type', 'text')
+                            .attr('value', '<a href="' + decodeURI(qualifyURL(target)) + '">' + URLtoPrettyPath(qualifyURL(target)) + '</a>')
+                        );
 				
 					var menu=$('<ul/>').addClass('menu list-unstyled');
 					
@@ -1266,15 +1275,46 @@ footer.navbar {
 						menu.append($('<li/>').append(menuItemPlay));
 					
 					menu.append($('<li/>').append(menuItemHighlight));
-
+					menu.append($('<li/>').append(menuItemSnippet));
 						
-//					alert(menuitem);
 					$(selected).popover({content: menu, html: true, trigger: 'manual'}).popover('show');
 					$(selected).addClass('popover-enabled');
 				}
 			});
 		}
 
+        // http://james.padolsey.com/javascript/getting-a-fully-qualified-url/#comment-3432
+        function qualifyURL(url) {
+            var a = document.createElement('a');
+            var protoRE = new RegExp('^' + location.protocol + '//');
+
+            a.href = url;
+            if (protoRE.test(a.href)) {
+                // IE7, FF, Op, Sf
+                return a.href;
+            } else {
+                // IE6
+                var img = document.createElement('img');
+                img.src = url;
+                return img.src;
+            }
+        }
+        
+        function URLtoPrettyPath(url) {
+            var path = decodeURI(url);
+            var pathPrefixRE = new RegExp('^' + '<?= $ctx->root ?>' + '/')
+            
+            // Remove "protocol://host.name.com:port"
+            //path.replace(location.protocol+'//'+location.hostname+(location.port ? ':'+location.port: ''), '');
+            path=path.replace(location.origin, '');
+            path=path.replace(pathPrefixRE, '');
+            
+            // URL's undesired parts are gone, now prettify
+            path=path.replace(new RegExp('/', 'g'),' ► ');
+            
+            return path;
+        }
+        
 		/*
 		function animateHighlights(par) {
 			$('.highlight').animate(
