@@ -1302,7 +1302,7 @@ footer.navbar {
         
         function URLtoPrettyPath(url) {
             var path = decodeURI(url);
-            var pathPrefixRE = new RegExp('^' + '<?= $ctx->root ?>' + '/')
+            var pathPrefixRE = new RegExp('^' + '<?= $ctx->rootAlias ?>' + '/')
             
             // Remove "protocol://host.name.com:port"
             //path.replace(location.protocol+'//'+location.hostname+(location.port ? ':'+location.port: ''), '');
