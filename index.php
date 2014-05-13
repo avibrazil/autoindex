@@ -385,7 +385,7 @@ class DirList {
 		echo DirList::renderRelatedFormItem();
 	}
 
-	function renderRelated() {		
+	function renderRelatedLinks() {
 		foreach ($this->meta['related'] as $k => $v) {
 			$l=NULL;
 			$t=NULL;
@@ -424,35 +424,35 @@ class DirList {
 		else if (isset($this->meta) && isset($this->meta[$v])) {
 			$o=$this->meta[$v];
 		} else return NULL;
-	
+
 		if (empty($o)) return NULL;
 
 		if (isset($o['fromURL'])) return $o['fromURL'];
-				
+
 		if (isset($o['lang.' . $this->userLang]))
 			return $o['lang.' . $this->userLang];
-		
+
 		if (isset($o['lang_' . $this->userLang]))
 			return $o['lang_' . $this->userLang];
-		
+
 		if (isset($o['lang.default']))
 			return $o['lang.default'];
-		
+
 		if (isset($o['lang_default']))
 			return $o['lang_default'];
-			
+
 //		if (isset($o[0]))
 //			return $o[0];
-			
-		
+
+
 		$keys=array_keys($o);
 		$validKeys=preg_grep("/lang[_\.].*/",$keys);
-		
+
 //		var_dump($validKeys);
-		
+
 		if (!empty($validKeys))
 			return $o[array_shift($validKeys)];
-		
+
 		return NULL;
 	}
 
@@ -476,7 +476,7 @@ class DirList {
 		
 		return NULL;
 	}
-	
+
 	function getLangAttribute($v) {
 		$l=$this->getMetaVarLang($v);
 		
@@ -1006,7 +1006,7 @@ footer.navbar {
 				<section id="related">
 					<h4>If you like this, you may also like…</h4>
 					<ul>
-						<?php $ctx->renderRelated() ?>
+						<?php $ctx->renderRelatedLinks() ?>
 					</ul>
 				</section>
 			<?php } ?>
