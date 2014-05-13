@@ -1163,12 +1163,13 @@ footer.navbar {
 			});			
 		}
 
-
-
-
 	</script>
 	<?php } ?>
 
+    
+    
+    
+    
     <script type="text/javascript" id="digitalk7-js">
 		var parameters= {
 			layout: 'layout2',
@@ -1216,82 +1217,93 @@ footer.navbar {
 		function enablePopovers() {
 			$('li .popover-trigger').click(function() {
 				var selected=this;
-				
+
 				if ($(selected).hasClass('popover-enabled')) {
-//					$(selected).popover('hide');
+				//	$(selected).popover('hide');
 					$(selected).popover('destroy');
 					$(selected).removeClass('popover-enabled');
-//					$(selected).removeAttr('data-original-title');
-//					$(selected).removeAttr('title');
-					//alert("Passei aqui");
+				//	$(selected).removeAttr('data-original-title');
+				//	$(selected).removeAttr('title');
 				} else {
-					// Delete any active other popovers 
-//					$('li .popover-trigger.popover-enabled').popover('hide');
+					// Delete any other active popovers 
+				//	$('li .popover-trigger.popover-enabled').popover('hide');
 					$('li .popover-trigger.popover-enabled').popover('destroy');
 					$('li .popover-trigger.popover-enabled').removeClass('popover-enabled');
-				
+
 					var index=$(selected).parent('li').data('index');
 					var target=$(selected).parent('li').data('target');
 					var name=$(selected).parent('li').data('name');
 					var mime=$(selected).parent('li').data('mimetype');
 					var type=$(selected).parent('li').data('type');
 
-										
-					var menuItemDownload=$('<a/>')
+					var menu=$('<ul/>').addClass('menu list-unstyled');
+
+					// Menu item: plain file download link
+					if (type=='file')
+						menu.append($('<li/>').append($('<a/>')
 						.addClass('menu-item')
 						.attr('href',target)
 						.append($('<span/>')
 							.addClass('glyphicon glyphicon-cloud-download'))
-						.append(' download file');
+						.append(' download file')));
 
-					var menuItemPlay=$('<a/>')
+					// Menu item: plain file play
+					if (typeof(mime) !== 'undefined' && mime.indexOf('audio',0)==0)
+						menu.append($('<li/>').append($('<a/>')
 						.addClass('menu-item')
 						.attr('href', target + "\?play")
 						.append($('<span/>')
 							.addClass('glyphicon glyphicon-play'))
-						.append(' play file');
-				
-					var menuItemHighlight=$('<a/>')
+						.append(' play file')));
+
+					// Menu item: highlight item
+					menu.append($('<li/>').append($('<a/>')
 						.addClass('menu-item')
 						.attr('href', "\?highlight=" + window.btoa(index) + "#main-list-" + (parseInt(index)-1).toString())
 						.append($('<span/>')
 							.addClass('glyphicon glyphicon-fire'))
-						.append(' highlight this item');
-                        
-                    var menuItemSnippetShare=$('<span/>')
+						.append(' highlight this item')));
+
+					// Menu item: field with HTML with pretty text and link to target
+					menu.append($('<li/>').append($('<span/>')
 						.append($('<span/>')
-							.addClass('glyphicon glyphicon-share-alt'))
+							.addClass('glyphicon glyphicon-share-alt')
+							.attr('title','Formatted link to file'))
 						.append($('<input/>')
-                            .attr('type', 'text')
-                            .attr('value', '<a href="' + decodeURI(qualifyURL(target)) + '">' + URLtoPrettyPath(qualifyURL(target)) + '</a>')
-                            .focus(function() {
-                                $(this).select();
-                            })
-                        );
-				
-                    var menuItemSnippetHighlightShare=$('<span/>')
+							.attr('type', 'text')
+							.attr('value', '<a href="' + decodeURI(qualifyURL(target)) + '">' + URLtoPrettyPath(qualifyURL(target)) + '</a>')
+							.focus(function() {
+								$(this).select();
+							})
+						)));
+
+					// Menu item: field with HTML with pretty text and link to parent with highlighted target
+					menu.append($('<li/>').append($('<span/>')
 						.append($('<span/>')
-							.addClass('glyphicon glyphicon-share'))
+							.addClass('glyphicon glyphicon-share')
+							.attr('title','Formatted highlighted share'))
 						.append($('<input/>')
-                            .attr('type', 'text')
-                            .attr('value', '<a href="' + decodeURI(qualifyURL(location.href + "\?highlight=" + window.btoa(index) + "#main-list-" + (parseInt(index)-1).toString())) + '">' + URLtoPrettyPath(qualifyURL(target)) + '</a>')
-                            .focus(function() {
-                                $(this).select();
-                            })
-                        );
-				
-					var menu=$('<ul/>').addClass('menu list-unstyled');
-					
-					if (type=='file')
-						menu.append($('<li/>').append(menuItemDownload));
-					
-					if (typeof(mime) !== 'undefined' && mime.indexOf('audio',0)==0)
-						menu.append($('<li/>').append(menuItemPlay));
-					
-					menu.append($('<li/>').append(menuItemHighlight));
-					menu.append($('<li/>').append(menuItemSnippetShare));
-					menu.append($('<li/>').append(menuItemSnippetHighlightShare));
-						
+							.attr('type', 'text')
+							.attr('value', '<a href="' + decodeURI(qualifyURL(location.href + "\?highlight=" + window.btoa(index) + "#main-list-" + (parseInt(index)-1).toString())) + '">' + URLtoPrettyPath(qualifyURL(target)) + '</a>')
+							.focus(function() {
+								$(this).select();
+							})
+						)));
+
+					// Menu item: Fully encoded URL, including the bullet char
+					menu.append($('<li/>').append($('<span/>')
+						.append($('<span/>')
+							.addClass('glyphicon glyphicon-share-alt')
+							.attr('title','Fully encoded URL, including bullet char'))
+						.append($('<input/>')
+							.attr('type', 'text')
+							.attr('value', encodeURI(decodeURI(qualifyURL(target))))
+							.focus(function() {
+								$(this).select();
+							})
+						)));
+
+
 					$(selected).popover({content: menu, html: true, trigger: 'manual'}).popover('show');
 					$(selected).addClass('popover-enabled');
 				}
@@ -1325,7 +1337,7 @@ footer.navbar {
             path=path.replace(pathPrefixRE, '');
             
             // URL's undesired parts are gone, now prettify
-            path=path.replace(new RegExp('/', 'g'),' ► ');
+            path=path.replace(new RegExp('/', 'g'),' ▸ ');
             
             return path;
         }
