@@ -360,32 +360,29 @@ class DirList {
 		}
 	  }
 
+	function renderRelatedFormItem($uri,$text) {
+		$t="<div class=\"row from-group related_group\">";
+		$t.="<div class=\"col-md-3\"><input type=\"text\" class=\"form-control uri in\" value=\"" . $uri . "\"></div>";
+		$t.="<div class=\"col-md-8\"><input type=\"text\" class=\"form-control text in\" value=\"" . $text . "\"></div>";
+		$t.="<div class=\"col-md-1\"><a href=\"" . $uri . "\" target=\"_new\"><span title=\"visit link\" class=\"glyphicon glyphicon-new-window\"></span></a> <span title=\"add entry\" class=\"glyphicon glyphicon-plus\" onclick=\"appendRelatedLink(this);\"></span></div>";
+		$t.="</div>";
+
+		return $t;
+	}
+
 	function renderRelatedForm() {
-		if (empty($this->meta['related'])) return;
 		foreach ($this->meta['related'] as $k => $v) {
 			$l=NULL;
 			$t=NULL;
 			$l=DirList::getMetaVarLang($v);
 			$lstring=empty($l)?"":"lang=\"$l\"";
 			if (!empty($l)) $t=DirList::getMetaVar($v);
-			
-			echo "<div class=\"row from-group related_group\">";
-			
-			echo "<div class=\"col-md-3\"><input type=\"text\" class=\"form-control uri in\" value=\"" . $v['uri'] . "\"></div>";
-			echo "<div class=\"col-md-8\"><input type=\"text\" class=\"form-control text in\" value=\"" . $t . "\"></div>";
-			echo "<div class=\"col-md-1\"><a href=\"" . $v['uri'] . "\" targe=\"_new\"><span title=\"add entry\" class=\"glyphicon glyphicon-new-window\"></span></a> <span title=\"add entry\" class=\"glyphicon glyphicon-plus\" onclick=\"appendRelatedLink(this);\"></span></div>";
 
-			echo "</div>";
+			echo DirList::renderRelatedFormItem($v['uri'],$t);
 		}
 
 		// render an additional empty item
-		echo "<div class=\"row from-group related_group\">";
-		
-		echo "<div class=\"col-md-3\"><input type=\"text\" class=\"form-control uri in\"></div>";
-		echo "<div class=\"col-md-8\"><input type=\"text\" class=\"form-control text in\"\"></div>";
-		echo "<div class=\"col-md-1\"><a href=\"\" targe=\"_new\"><span title=\"add entry\" class=\"glyphicon glyphicon-new-window\"></span></a> <span title=\"add entry\" class=\"glyphicon glyphicon-plus\" onclick=\"appendRelatedLink(this);\"></span></div>";
-
-		echo "</div>";
+		echo DirList::renderRelatedFormItem();
 	}
 
 	function renderRelated() {		
@@ -1102,65 +1099,66 @@ footer.navbar {
 			}
 		}
 
+		// Serialize input forms into JSON
 		function toJSON() {
 			var asString;
 			var obj = new Object();
 			var v;
-			
+
 			if ((v=$('#custom_link #forTitle').val()) !== "") {
 				obj.title = new Object();
 				obj.title.lang_default=v;
 			}
-			
+
 			if ((v=$('#custom_link #forNotesBefore').val()) !== "") {
-				obj.notesBefore = new Object();			
+				obj.notesBefore = new Object();
 				obj.notesBefore.lang_default = new Object();
 				obj.notesBefore.lang_default = v;
 			}
-			
+
 			if ((v=$('#custom_link #forNotesAfter').val()) !== "") {
 				obj.notesAfter = new Object();
 				obj.notesAfter.lang_default = new Object();
 				obj.notesAfter.lang_default = v;
 			}
-			
+
 			if ((v=$('#custom_link #forHighlight').val()) !== "") {
 				obj.highlight = v;
 			}
-			
+
 			$('#custom_link #related-links div.related_group').each(function(i) {
 				var u=$(this).find('.uri').val();
-				
+
 				if (u !== "") {
 					// http://stackoverflow.com/a/1961539
 					obj.related = obj.related || []
-					
+
 					obj.related[i] = new Object();
 					obj.related[i].uri=$(this).find('.uri').val();
-					
+
 					var t=$(this).find('.text').val();
-					
+
 					if (t !== "")
 						obj.related[i].lang_default=$(this).find('.text').val();
 				}
 			});
-			
+
 			$('#meta-json').val(JSON.stringify(obj));
 		}
 
 		function appendRelatedLink(e) {
 			var d=$(e).parents('.related_group');
 			var n=d.clone();
-			
+
 			n.insertAfter(d);
-			
+
 			toJSON();
 		}
 
 		function initFormElements(par) {	
 			$('#custom_link .in').blur(function(){
 				toJSON();
-			});			
+			});
 		}
 
 	</script>
@@ -1175,7 +1173,7 @@ footer.navbar {
 			layout: 'layout2',
 			ads: 'false'
 		}
-		
+
 		function imgError(image) {
 			// http://stackoverflow.com/a/12994474
 			$(image).hide();
