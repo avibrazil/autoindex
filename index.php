@@ -130,7 +130,7 @@ class DirList {
 		
 		return "/".join('/', $paths);
 	}
-	
+
 	function folderImage() {
 		$folderImageName = "folder.jpg";
 	
@@ -209,7 +209,6 @@ class DirList {
 		$string=str_replace("＜","<",$string);
 		$string=str_replace("＆","&",$string);
 		$string=str_replace("✱","*",$string);
-		$string=str_replace("∶",":",$string);
 		$string=str_replace("∶",":",$string);
 
 		return $string;
@@ -358,7 +357,7 @@ class DirList {
 				$ihighlight++;
 			}
 		}
-	  }
+	}
 
 	function renderRelatedFormItem($uri,$text) {
 		$t="<div class=\"row from-group related_group\">";
@@ -393,12 +392,12 @@ class DirList {
 			$lstring=empty($l)?"":"lang=\"$l\"";
 			//$lstring=DirList::getLangAttribute($v);
 			if (!empty($l)) $t=DirList::getMetaVar($v);
-			
+
 			if (empty($t)) {
 				# autotitle
-				
+
 				$t=$v['uri'];
-				
+
 				$pat = array(
 					'/\.\.\//',
 					'/\?.*/',
@@ -411,7 +410,7 @@ class DirList {
 					'',
 					' » '
 				);
-				
+
 				$t=preg_replace($pat,$rep,$t);
 			}
 
@@ -461,19 +460,19 @@ class DirList {
 		else if (isset($this->meta) && isset($this->meta[$v])) {
 			$o=$this->meta[$v];
 		} else return NULL;
-		
+
 		if (empty($o)) return NULL;
 		if (isset($o['fromURL'])) return NULL;
 		if (isset($o['lang.' . $this->userLang]) || isset($o['lang_' . $this->userLang])) return $this->userLang;
 		if (isset($o['lang.default']) || isset($o['lang_default'])) return 'en';
-		
+
 		$keys=array_keys($o);
 		$validKeys=preg_grep("/lang[_\.].*/",$keys);
 		//var_dump($validKeys);
-		
+
 		if (!empty($validKeys))
 			return preg_replace("/lang[_\.]/",'',array_shift($validKeys));
-		
+
 		return NULL;
 	}
 
@@ -482,34 +481,34 @@ class DirList {
 		
 		if ($l) echo "lang=\"$l\"";
 	}
-	
+
 	function getMetaJSON() {
 		return json_encode($this->meta);
 	}
-	
+
 	function getURLJSON () {
 	}
-	
+
 	function loadMeta() {
 		$file=$this->path . "meta.json";
-		
+
 		if (file_exists($file)) {
 			$metameta=json_decode(file_get_contents($file),true);
-			
+
 			if (isset($metameta['title']))
-			$this->meta['title']         = $metameta['title'];
+				$this->meta['title']         = $metameta['title'];
 
-			if (isset($metameta['notesBefore']))			
-			$this->meta['notes_before']  = $metameta['notesBefore'];
-			
-			if (isset($metameta['notesAfter']))			
-			$this->meta['notes_after']   = $metameta['notesAfter'];
+			if (isset($metameta['notesBefore']))
+				$this->meta['notes_before']  = $metameta['notesBefore'];
 
-			if (isset($metameta['highlight']))			
-			$this->meta['highlight'][0]  = $metameta['highlight'];
-			
-			if (isset($metameta['related']))			
-			$this->meta['related']       = $metameta['related'];
+			if (isset($metameta['notesAfter']))
+				$this->meta['notes_after']   = $metameta['notesAfter'];
+
+			if (isset($metameta['highlight']))
+				$this->meta['highlight'][0]  = $metameta['highlight'];
+
+			if (isset($metameta['related']))
+				$this->meta['related']       = $metameta['related'];
 		}
 	}
 
@@ -543,7 +542,7 @@ class DirList {
 				$this->meta[$k]['fromURL']=base64_decode(str_replace(".","+",$v));
 			}
 
-			
+
 			# convert hightlight string (e.g. "1,3,7,8") into an array
 			if (!empty($this->meta['highlight'])) {
 				foreach ($this->meta['highlight'] as $k => $v) {
@@ -556,7 +555,7 @@ class DirList {
 			}
 		}
 	}
-	
+
 	/* while we wait for PHP 5.5... */
 	function json_last_error_msg() {
 		switch (json_last_error()) {
@@ -586,7 +585,11 @@ class DirList {
 	}
 
 }
-  
+?>
+
+<?php
+
+/* Functions borrowed from WordPress */
 
 /**
  * Replaces double line-breaks with paragraph elements.
@@ -686,11 +689,14 @@ function wpautop($pee, $br = true) {
 function _autop_newline_preservation_helper( $matches ) {
 	return str_replace("\n", "<WPPreserveNewline />", $matches[0]);
 }
+?>
+
+<?php
+/* Main block */
 
 $ctx = new DirList();
 
 $ctx->processForm();
-
 ?>
 
 <!DOCTYPE html>
@@ -1054,8 +1060,8 @@ footer.navbar {
       <?php if ($ctx->publicSite===FALSE) {?>
       <p class="lead"><a href="<?php echo $ctx->publicHostEquivalentURL ?>">On public site</a></p>
       <section class="row" id="page_dynamics">
-	    <h5 onclick="javascript:toogleDisplayForm()" class="section-title">Admin...</h5>
-	    <div id="page_dynamics_form">
+        <h5 onclick="javascript:toogleDisplayForm()" class="section-title">Admin...</h5>
+        <div id="page_dynamics_form">
         <div class="infobox col-md-9">
           <form id="custom_link" name="custom_link" method="post" onsubmit="clearFormElements()">
             <input class="in col-md-12 form-control" type="text" id="forTitle" placeholder="Text for dynamic title" value="<?= $ctx->getMetaVar('title') ?>" name="title" />
@@ -1073,10 +1079,10 @@ footer.navbar {
             <?= $ctx->renderRelatedForm() ?>
             </div>
             
-			<br/>
+            <br/>
             <button type="submit" class="btn btn-primary">Customize page</button>
             <br/>
-            <textarea class="in col-md-12 form-control" id="inspector" placeholder="INSPECTOR"><!--?php var_dump($_SERVER); ?--></textarea>
+            <textarea class="in col-md-12 form-control" id="inspector" placeholder="INSPECTOR"><?php var_dump($ctx); ?></textarea>
           </form>
 		</div>
 		<div class="col-md-3">
