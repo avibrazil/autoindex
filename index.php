@@ -1,5 +1,31 @@
 <?php
 
+# Put this in .htaccess for a better integration with this script
+
+/*
+	RewriteEngine on
+	RewriteBase /media/
+
+	# Detect if user wants a media file
+	RewriteRule ^.*\.(mp3|m4a|mp4|m4v|mov|mkv|mka|flac|ogg)$    - [E=media:1]
+
+	# Convert hot link into highlighted file on parent folder page
+	RewriteCond %{ENV:media} =1
+	RewriteCond expr "! %{HTTP_REFERER} -strmatch '*://%{HTTP_HOST}*'"
+	RewriteRule ^(.*)/(.*\..*)$ $1/?rehili=$2 [QSA,R]
+
+	# If URI contains a "?play", use default mime-type, which will probably
+	# lead the browser to play the file
+	RewriteCond %{ENV:media} =1
+	RewriteCond %{QUERY_STRING} ^play$
+	RewriteRule . - [L]
+
+	# If URI doesn't contain a ?play, change mime-type to octet-stream, so it will be downloaded
+	RewriteCond %{ENV:media} =1
+	RewriteRule . - [L,T=application/octet-stream]
+*/
+
+
 class DirList {
 	function __construct() {
 		$this->locale = "pt_BR.UTF-8";
@@ -9,7 +35,7 @@ class DirList {
 		$this->publicHostRootAlias = "/mus";
 
 		$this->userLang        = substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2);
-		$this->location        = urldecode($_SERVER["SCRIPT_URL"]);
+		$this->location        = urldecode(str_replace("?" . $_SERVER["QUERY_STRING"], "" ,$_SERVER["REQUEST_URI"]));
 		$this->tokenizedLocation = explode("/",$this->location);
 		$this->isFacebook      = (strpos($_SERVER["HTTP_USER_AGENT"],'facebook')!==FALSE);
 		$this->script_location = str_replace("index.php", "", $_SERVER["PHP_SELF"]); 
@@ -45,6 +71,9 @@ class DirList {
 		} else {
 			$this->reducedLocation = $this->location;
 		}
+
+		# Load ./meta.json file and overwrite with variables passed in URL
+		$this->processForm();
 	}
 
 	function breadcrumb() {
@@ -247,17 +276,23 @@ class DirList {
 						}
 					}
 
+					if ($this->getMetaVar('rehili')) {
+						$pattern="/" . $this->getMetaVar('rehili') . "/";
+						if (preg_match($pattern, $dirdesc['link']))
+							$modifier.=" active";
+					}
+
 					echo "<li id=\"main-list-$ihighlight\" class=\" folder $modifier\" data-type=\"folder\" data-subtype=\"$modifier\" data-index=\"$ihighlight\" data-target=\"" . $dirdesc['link'] . "\" data-name=\"" . $dirdesc['name'] . "\">";
 					echo "<span class=\"link\"><a href=\"" . $dirdesc['link'] . "/\">$icon</a></span>";
 					echo "<span class=\"name\"><a href=\"" . $dirdesc['link'] . "/\">" . $dirdesc['name'] . "</a></span> <a class=\"popover-trigger\" title=\"Options for item\"><span class=\"glyphicon glyphicon-circle-arrow-right\"></span></a></li>\n";
 
-	/*               
+	/*
 					echo "<span class=\"list-group-item folder $modifier\">\n";
 					echo "<a href=\"{$dirs[$i]}/\"><span class=\"glyphicon glyphicon-folder-open\"></span></a>\n";
 					echo "<a href=\"{$dirs[$i]}/\">$dirdesc</a>\n";
 					echo "</span>";
 	*/				
-				
+
 					$ihighlight++;
 				}
 			}
@@ -281,7 +316,7 @@ class DirList {
 				$mime="";        
 				$filename = $file["name"];
 				$ext = substr(strrchr($filename, '.'), 1);
-			
+
 				$modifier="_$ext";
 
 				switch ("$ext") {
@@ -304,7 +339,7 @@ class DirList {
 						$mime='audio/wav';
 						break;
 				}
-				
+
 				if (strpos($mime,'audio')!==FALSE) {
 					$audio=TRUE;
 					$icon="<span class=\"glyphicon glyphicon-volume-up\"></span>";
@@ -318,10 +353,16 @@ class DirList {
 					if (isset($this->meta['highlight']['fromURL'])) {
 						if (array_search($ihighlight,$this->meta['highlight']['fromURL']) !== FALSE)
 							$modifier.=" active";
-					} else {
-						if (array_search($ihighlight,$this->meta['highlight'][0]) !== FALSE)
-							$modifier.=" active";
-					}
+						} else {
+							if (array_search($ihighlight,$this->meta['highlight'][0]) !== FALSE)
+								$modifier.=" active";
+						}
+				}
+
+				if ($this->getMetaVar('rehili')) {
+					$pattern="/" . $this->getMetaVar('rehili') . "/";
+					if (preg_match($pattern, $filename)===1)
+						$modifier.=" active";
 				}
 
 				$url = $file["link"];
@@ -336,7 +377,7 @@ class DirList {
 						'<span class="track">$1</span> <span itemprop=\"name\">$2</span><span class="extension">$3</span>',
 						$filename);
 				}
-								
+
 				$size = DirList::formatBytes($file["size"]);
 
 				echo "<li id=\"main-list-$ihighlight\" class=\" file $modifier\" data-mimetype=\"$mime\" data-type=\"file\" data-subtype=\"$modifier\" data-index=\"$ihighlight\" data-target=\"$url\" data-name=\"$filename\" data-size=\"" . $file["size"] . "\">";
@@ -482,13 +523,6 @@ class DirList {
 		if ($l) echo "lang=\"$l\"";
 	}
 
-	function getMetaJSON() {
-		return json_encode($this->meta);
-	}
-
-	function getURLJSON () {
-	}
-
 	function loadMeta() {
 		$file=$this->path . "meta.json";
 
@@ -538,8 +572,12 @@ class DirList {
 			foreach ($_GET as $k => $v) {
 				# $nk=str_replace("__","",$k);
 				
-				/* Now overwrite whatever came from the directory META file */
-				$this->meta[$k]['fromURL']=base64_decode(str_replace(".","+",$v));
+				/* Now overwrite whatever came from the directory meta.json file */
+                if ($k === "rehili") {
+                    $this->meta[$k]['fromURL']=$v;
+                } else {
+                    $this->meta[$k]['fromURL']=base64_decode(str_replace(".","+",$v));
+                }
 			}
 
 
@@ -695,15 +733,13 @@ function _autop_newline_preservation_helper( $matches ) {
 /* Main block */
 
 $ctx = new DirList();
-
-$ctx->processForm();
 ?>
 
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 
 
     <!-- Bootstrap suite -->
@@ -713,8 +749,8 @@ $ctx->processForm();
     <!--link rel="stylesheet" href="bootstrap/css/bootstrap-theme.min.css" /-->
     <!-- Latest compiled and minified JavaScript -->
     <script src="<?= $ctx->script_location ?>/bootstrap/js/bootstrap.min.js"></script>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"></meta>
-	<meta property="fb:admins" content="543888243" /></meta>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+	<meta property="fb:admins" content="543888243"/>
     <!-- Customizations -->
     <!--link rel="stylesheet" href="style.css" /-->
 
@@ -1018,7 +1054,6 @@ footer.navbar {
 			<?php } ?>
 			
           </article>
-        </div>
       </section>
     </section>
 
@@ -1082,7 +1117,7 @@ footer.navbar {
             <br/>
             <button type="submit" class="btn btn-primary">Customize page</button>
             <br/>
-            <textarea class="in col-md-12 form-control" id="inspector" placeholder="INSPECTOR"><?php var_dump($ctx); ?></textarea>
+            <textarea class="in col-md-12 form-control" id="inspector" placeholder="INSPECTOR"><?php var_dump($_SERVER); ?></textarea>
           </form>
 		</div>
 		<div class="col-md-3">

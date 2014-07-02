@@ -3,5 +3,5 @@
 # The "/media/autoindex/index.php" is the URI of the script, not the real filesystem address.
 
 <IfModule mod_dir.c>
-    DirectoryIndex /media/autoindex/index.php
+	DirectoryIndex /media/autoindex/index.php
 </IfModule> 
