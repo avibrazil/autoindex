@@ -3,26 +3,39 @@
 # Put this in .htaccess for a better integration with this script
 
 /*
-	RewriteEngine on
-	RewriteBase /media/
+RewriteEngine on
+RewriteBase /
 
-	# Detect if user wants a media file
-	RewriteRule ^.*\.(mp3|m4a|mp4|m4v|mov|mkv|mka|flac|ogg)$    - [E=media:1]
+# Detect if user wants a media file
+RewriteRule ^.*\.(mp3|m4a|mp4|m4v|mov|mkv|mpg|avi|mka|flac|ogg)$ - [E=media:1]
 
-	# Convert hot link into highlighted file on parent folder page
-	RewriteCond %{ENV:media} =1
-	RewriteCond expr "! %{HTTP_REFERER} -strmatch '*://%{HTTP_HOST}*'"
-	RewriteRule ^(.*)/(.*\..*)$ $1/?rehili=$2 [QSA,R]
+# Convert hot link into highlighted file on parent folder page
+RewriteCond %{ENV:media} =1
+#RewriteCond expr "! %{HTTP_REFERER} -strcmatch '*://%{HTTP_HOST}*'"
+RewriteCond %{HTTP_REFERER} !^http://DigitalK7\.com.* [NC]
+RewriteCond %{HTTP_USER_AGENT} !^AppleCoreMedia.*
+RewriteCond %{HTTP_USER_AGENT} !^.*Googlebot.*
+RewriteRule ^(.*)/(.*\..*)$ $1/?rehili=$2 [QSA,R]
 
-	# If URI contains a "?play", use default mime-type, which will probably
-	# lead the browser to play the file
-	RewriteCond %{ENV:media} =1
-	RewriteCond %{QUERY_STRING} ^play$
-	RewriteRule . - [L]
+# If URI contains a "?play", use default mime-type, which will probably
+# lead the browser to play the file
+RewriteCond %{ENV:media} =1
+RewriteCond %{QUERY_STRING} ^play$
+RewriteRule . - [L]
 
-	# If URI doesn't contain a ?play, change mime-type to octet-stream, so it will be downloaded
-	RewriteCond %{ENV:media} =1
-	RewriteRule . - [L,T=application/octet-stream]
+# If URI doesn't contain a ?play, change mime-type to octet-stream, so
+# it will be downloaded
+RewriteCond %{ENV:media} =1
+RewriteCond %{REQUEST_METHOD} !^HEAD$
+RewriteCond %{HTTP_USER_AGENT} !^AppleCoreMedia.*
+RewriteCond %{HTTP_USER_AGENT} !^.*Googlebot.*
+RewriteRule . - [L,T=application/octet-stream]
+
+
+
+# Rotate all dir requests to this script
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule . /autoindex/index.php [L]
 */
 
 
@@ -248,6 +261,28 @@ class DirList {
 		list($files, $dirs) = $this->list_dir();
 		$modifier="";
 		$ihighlight=0;
+		
+		$regexHighlight=$this->getMetaVar('rehili');
+		if ($regexHighlight) {
+			$patterns = array (
+				'/\(/',
+				'/\)/',
+				'/\[/',
+				'/\]/',
+				'/\{/',
+				'/\}/'
+			);
+			$replace = array (
+				'\\\(',
+				'\\\)',
+				'\\\[',
+				'\\\]',
+				'\\\{',
+				'\\\}'
+			);
+			$regexHighlight=preg_replace($patterns, $replace, $regexHighlight);
+			$regexHighlight='/' . $regexHighlight . '/';
+		}
 
 		// Display list of directories:
 		if (!empty($dirs)) {
@@ -275,10 +310,9 @@ class DirList {
 								$modifier.=" active";
 						}
 					}
-
-					if ($this->getMetaVar('rehili')) {
-						$pattern="/" . $this->getMetaVar('rehili') . "/";
-						if (preg_match($pattern, $dirdesc['link']))
+					
+					if ($regexHighlight) {
+						if (preg_match($regexHighlight, $dirdesc['link']))
 							$modifier.=" active";
 					}
 
@@ -359,9 +393,8 @@ class DirList {
 						}
 				}
 
-				if ($this->getMetaVar('rehili')) {
-					$pattern="/" . $this->getMetaVar('rehili') . "/";
-					if (preg_match($pattern, $filename)===1)
+				if ($regexHighlight) {
+					if (preg_match($regexHighlight, $filename))
 						$modifier.=" active";
 				}
 
