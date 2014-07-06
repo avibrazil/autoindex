@@ -878,6 +878,14 @@ footer.navbar {
 }
 */
 
+#list .popover-content .embedSnippets .panel-body {
+	padding: 0;
+}
+
+#list .popover-content .embedSnippets .panel-body textarea {
+	width: 100%;
+	font-size: smaller;
+}
 
 #list li .popover-trigger {
 /*	display: none; */
@@ -1150,7 +1158,7 @@ footer.navbar {
             <br/>
             <button type="submit" class="btn btn-primary">Customize page</button>
             <br/>
-            <textarea class="in col-md-12 form-control" id="inspector" placeholder="INSPECTOR"><?php var_dump($_SERVER); ?></textarea>
+            <textarea class="in col-md-12 form-control" id="inspector" placeholder="INSPECTOR"><!--?php var_dump($_SERVER); ?--></textarea>
           </form>
 		</div>
 		<div class="col-md-3">
@@ -1309,6 +1317,10 @@ footer.navbar {
 					var type=$(selected).parent('li').data('type');
 
 					var menu=$('<ul/>').addClass('menu list-unstyled');
+					
+					var embedSnippets=$('<div/>')
+						.addClass('panel-group embedSnippets')
+						.attr('id','embedSnippets-' + index);
 
 					// Menu item: plain file download link
 					if (type=='file')
@@ -1337,46 +1349,100 @@ footer.navbar {
 						.append(' highlight this item')));
 
 					// Menu item: field with HTML with pretty text and link to target
-					menu.append($('<li/>').append($('<span/>')
-						.append($('<span/>')
-							.addClass('glyphicon glyphicon-share-alt')
-							.attr('title','Formatted link to file'))
-						.append($('<input/>')
-							.attr('type', 'text')
-							.attr('value', '<a href="' + decodeURI(qualifyURL(target)) + '">' + URLtoPrettyPath(qualifyURL(target)) + '</a>')
-							.focus(function() {
-								$(this).select();
-							})
-						)));
+					embedSnippets.append($('<div/>').addClass('panel panel-default')
+						.append($('<div/>').addClass('panel-heading')
+							.append($('<h4/>').addClass('panel-title')
+								.append($('<a/>')
+									.attr('href','#embedSnippets-' + index + '-1')
+									.attr('data-parent','#embedSnippets-' + index)
+									.attr('data-toggle','collapse')
+									.append('Formatted link to file')
+								)
+							)
+						)
+						.append($('<div/>').addClass('panel-collapse collapse')
+							.attr('id','embedSnippets-' + index + '-1')
+							.append($('<div/>')
+								.addClass('panel-body')
+								.append($('<textarea/>').addClass('snippet')
+									.attr('readonly','readonly')
+									.focus(function() {
+										$(this).select();
+									})
+									.text(
+										'<a href="' +
+										decodeURI(qualifyURL(target)) +
+										'">' +
+										URLtoPrettyPath(qualifyURL(target)) +
+										'</a>'
+									)
+								)
+							)
+						)
+					);
 
+					
 					// Menu item: field with HTML with pretty text and link to parent with highlighted target
-					menu.append($('<li/>').append($('<span/>')
-						.append($('<span/>')
-							.addClass('glyphicon glyphicon-share')
-							.attr('title','Formatted highlighted share'))
-						.append($('<input/>')
-							.attr('type', 'text')
-							.attr('value', '<a href="' + decodeURI(qualifyURL(location.href + "\?highlight=" + window.btoa(index) + "#main-list-" + (parseInt(index)-1).toString())) + '">' + URLtoPrettyPath(qualifyURL(target)) + '</a>')
-							.focus(function() {
-								$(this).select();
-							})
-						)));
+					embedSnippets.append($('<div/>').addClass('panel panel-default')
+						.append($('<div/>').addClass('panel-heading')
+							.append($('<h4/>').addClass('panel-title')
+								.append($('<a/>')
+									.attr('href','#embedSnippets-' + index + '-2')
+									.attr('data-parent','#embedSnippets-' + index)
+									.attr('data-toggle','collapse')
+									.append('Formatted highlighted share')
+								)
+							)
+						)
+						.append($('<div/>').addClass('panel-collapse collapse')
+							.attr('id','embedSnippets-' + index + '-2')
+							.append($('<div/>')
+								.addClass('panel-body')
+								.append($('<textarea/>').addClass('snippet')
+									.attr('readonly','readonly')
+									.focus(function() {
+										$(this).select();
+									})
+									.text(
+										'<a href="' + 
+										decodeURI(qualifyURL(location.href + "\?highlight=" + window.btoa(index) +
+										"#main-list-" + (parseInt(index)-1).toString())) + '">' +
+										URLtoPrettyPath(qualifyURL(target)) +
+										'</a>'
+									)
+								)
+							)
+						)
+					);
 
 					// Menu item: Fully encoded URL, including the bullet char
-					menu.append($('<li/>').append($('<span/>')
-						.append($('<span/>')
-							.addClass('glyphicon glyphicon-share-alt')
-							.attr('title','Fully encoded URL, including bullet char'))
-						.append($('<input/>')
-							.attr('type', 'text')
-							.attr('value', encodeURI(decodeURI(qualifyURL(target))))
-							.focus(function() {
-								$(this).select();
-							})
-						)));
+					embedSnippets.append($('<div/>').addClass('panel panel-default')
+						.append($('<div/>').addClass('panel-heading')
+							.append($('<h4/>').addClass('panel-title')
+								.append($('<a/>')
+									.attr('href','#embedSnippets-' + index + '-3')
+									.attr('data-parent','#embedSnippets-' + index)
+									.attr('data-toggle','collapse')
+									.append('Fully encoded URL, including “•”')
+								)
+							)
+						)
+						.append($('<div/>').addClass('panel-collapse collapse')
+							.attr('id','embedSnippets-' + index + '-3')
+							.append($('<div/>')
+								.addClass('panel-body')
+								.append($('<textarea/>').addClass('snippet')
+									.attr('readonly','readonly')
+									.focus(function() {
+										$(this).select();
+									})
+									.text(encodeURI(decodeURI(qualifyURL(target))))
+								)
+							)
+						)
+					);
 
-
-					$(selected).popover({content: menu, html: true, trigger: 'manual'}).popover('show');
+					$(selected).popover({content: menu.append(embedSnippets), html: true, trigger: 'manual'}).popover('show');
 					$(selected).addClass('popover-enabled');
 				}
 			});
