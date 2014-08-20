@@ -49,7 +49,7 @@ class DirList {
 
 		$this->userLang        = substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2);
 		$this->location        = urldecode(str_replace("?" . $_SERVER["QUERY_STRING"], "" ,$_SERVER["REQUEST_URI"]));
-		$this->URL             = $_SERVER["REQUEST_SCHEME"] . "://" . $_SERVER["HTTP_HOST"] . $this->location;
+		$this->URL             = $_SERVER["REQUEST_SCHEME"]?$_SERVER["REQUEST_SCHEME"]:"http" . "://" . $_SERVER["HTTP_HOST"] . $this->location;
 		$this->tokenizedLocation = explode("/",$this->location);
 		$this->isFacebook      = (strpos($_SERVER["HTTP_USER_AGENT"],'facebook')!==FALSE);
 		$this->script_location = str_replace("index.php", "", $_SERVER["PHP_SELF"]); 
@@ -1133,7 +1133,7 @@ footer.navbar {
 				  <textarea class="snippet"><?php 
             				  printf("wget -m --no-parent --restrict-file-names=nocontrol --user-agent='%s 【direct download】' --referer='%s' '%s'",
             				  	$_SERVER["HTTP_USER_AGENT"],
-            				  	$_SERVER["REQUEST_SCHEME"] . "://" . $_SERVER["HTTP_HOST"] . "/",
+            				  	$_SERVER["REQUEST_SCHEME"]?$_SERVER["REQUEST_SCHEME"]:"http" . "://" . $_SERVER["HTTP_HOST"] . "/",
             				  	$ctx->URL); ?>
             	  </textarea>
 			  </div>
