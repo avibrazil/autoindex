@@ -49,6 +49,7 @@ class DirList {
 
 		$this->userLang        = substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2);
 		$this->location        = urldecode(str_replace("?" . $_SERVER["QUERY_STRING"], "" ,$_SERVER["REQUEST_URI"]));
+		$this->URL             = $_SERVER["REQUEST_SCHEME"] . "://" . $_SERVER["HTTP_HOST"] . $this->location;
 		$this->tokenizedLocation = explode("/",$this->location);
 		$this->isFacebook      = (strpos($_SERVER["HTTP_USER_AGENT"],'facebook')!==FALSE);
 		$this->script_location = str_replace("index.php", "", $_SERVER["PHP_SELF"]); 
@@ -882,7 +883,7 @@ footer.navbar {
 	padding: 0;
 }
 
-#list .popover-content .embedSnippets .panel-body textarea {
+#list .popover-content .embedSnippets .panel-body textarea, .panel-info textarea.snippet {
 	width: 100%;
 	font-size: smaller;
 }
@@ -1128,6 +1129,13 @@ footer.navbar {
 					<li><a href="/download-how-to">How to download media from Digital K7</a></li>
 					<li><a href="/organization">How the collection is organized</a></li>
 				  </ul>
+				  <p>Command to <a href="/download-how-to">download this folder and subfolders</a> (paste it on Mac and Linux terminal window or Windows command line):</p>
+				  <textarea class="snippet"><?php 
+            				  printf("wget -m --no-parent --restrict-file-names=nocontrol --user-agent='%s 【direct download】' --referer='%s' '%s'",
+            				  	$_SERVER["HTTP_USER_AGENT"],
+            				  	$_SERVER["REQUEST_SCHEME"] . "://" . $_SERVER["HTTP_HOST"] . "/",
+            				  	$ctx->URL); ?>
+            	  </textarea>
 			  </div>
 			</section>
 		</div>
@@ -1158,7 +1166,7 @@ footer.navbar {
             <br/>
             <button type="submit" class="btn btn-primary">Customize page</button>
             <br/>
-            <textarea class="in col-md-12 form-control" id="inspector" placeholder="INSPECTOR"><!--?php var_dump($_SERVER); ?--></textarea>
+            <textarea class="in col-md-12 form-control" id="inspector" placeholder="INSPECTOR"><?php var_dump($_SERVER); ?></textarea>
           </form>
 		</div>
 		<div class="col-md-3">
