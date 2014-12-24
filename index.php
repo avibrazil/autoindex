@@ -253,6 +253,8 @@ class DirList {
 		$string=str_replace("＆","&",$string);
 		$string=str_replace("✱","*",$string);
 		$string=str_replace("∶",":",$string);
+		$string=str_replace("％","%",$string);
+		$string=str_replace("＋","+",$string);
 
 		return $string;
 	}
@@ -1131,7 +1133,7 @@ footer.navbar {
 				  </ul>
 				  <p>Command to <a href="/download-how-to">download this folder and subfolders</a> (paste it on Mac and Linux terminal window or Windows command line):</p>
 				  <textarea class="snippet"><?php 
-            				  printf("wget -m --no-parent --restrict-file-names=nocontrol --user-agent='%s 【direct download】' --referer='%s' '%s'",
+            				  printf("wget -m --no-parent --restrict-file-names=nocontrol --user-agent='%s [direct download]' --referer='%s' '%s'",
             				  	$_SERVER["HTTP_USER_AGENT"],
             				  	$_SERVER["REQUEST_SCHEME"]?$_SERVER["REQUEST_SCHEME"]:"http" . "://" . $_SERVER["HTTP_HOST"] . "/",
             				  	$ctx->URL); ?>
@@ -1166,7 +1168,7 @@ footer.navbar {
             <br/>
             <button type="submit" class="btn btn-primary">Customize page</button>
             <br/>
-            <textarea class="in col-md-12 form-control" id="inspector" placeholder="INSPECTOR"><?php var_dump($_SERVER); ?></textarea>
+            <!--textarea class="in col-md-12 form-control" id="inspector" placeholder="INSPECTOR"><?php var_dump($_SERVER); ?></textarea-->
           </form>
 		</div>
 		<div class="col-md-3">
