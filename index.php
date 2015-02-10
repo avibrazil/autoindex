@@ -999,7 +999,7 @@ footer.navbar {
         </div>
       </nav>
 
-      <hgroup id="title" class="page-header" style="margin-top: 5em">
+      <hgroup id="title" class="page-header">
 		<h1 <?php $ctx->getLangAttribute('title') ?>><?php
 			if ($title !== NULL) {
 				echo $title;
@@ -1499,6 +1499,9 @@ footer.navbar {
 		}
 		*/
 
+		function fixContainersHeight() {
+			$('.page-header').css('margin-top',$('header.container>nav').css('height'));
+		}
 
 
 		$(document).ready(function() {
@@ -1515,7 +1518,7 @@ footer.navbar {
 				initFormElements(parameters);
 			}
 
-		//			fixContainersHeight(parameters);
+			fixContainersHeight(parameters);
 		//			animateHighlights(parameters);
 		});
 		-->
