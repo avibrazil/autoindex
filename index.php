@@ -61,7 +61,7 @@ class DirList {
 			$this->publicSite = TRUE;
 		} else {
 			$this->root = "/media/Media";
-			$this->rootAlias = "/media";
+			$this->rootAlias = "/midia";
 			$this->publicSite = FALSE;
 			
 			$__count=1;
@@ -1501,6 +1501,7 @@ footer.navbar {
 
 		function fixContainersHeight() {
 			$('.page-header').css('margin-top',$('header.container>nav').css('height'));
+
 		}
 
 
