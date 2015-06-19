@@ -35,6 +35,7 @@ RewriteRule . - [L,T=application/octet-stream]
 
 # Rotate all dir requests to this script
 RewriteCond %{REQUEST_FILENAME} -d
+RewriteCond %{REQUEST_FILENAME} !^.*wp-admin.*
 RewriteRule . /autoindex/index.php [L]
 */
 
@@ -88,6 +89,26 @@ class DirList {
 
 		# Load ./meta.json file and overwrite with variables passed in URL
 		$this->processForm();
+	}
+
+	function checkValidPath() {
+		if (! file_exists($this->path)) {
+			header("HTTP/1.0 404 Not Found",false,404);
+			printf("<html><head><title>Not Found: %1$s</title></head>
+					<body><h1>Not Found</h1>%1$s</body></html>",
+				$this->path);
+			exit;
+			return 404;
+		} else if (! is_readable($this->path)) {
+			header("HTTP/1.0 403 No Access",false,403);
+			printf("<html><head><title>No Access: %1$s</title></head>
+					<body><h1>No Access</h1>%1$s</body></html>",
+				$this->path);
+			exit;
+			return 403;
+		}
+		
+		return 200;
 	}
 
 	function breadcrumb() {
@@ -193,10 +214,10 @@ class DirList {
 	function list_dir() {
 		$files = array();
 		$dirs = array();
-		$dir = opendir($this->path);
-
-		if (!$dir) return;
+		$dir = "";
 		
+		$dir = @opendir($this->path);
+
 		while ( ($entry = readdir($dir)) !== false ) {
 			//      if (in_excludes($entry)) continue;
 
@@ -235,7 +256,7 @@ class DirList {
 		#reset($files);
 		#reset($dirs);
 
-		return array($files, $dirs);
+		return array(200,$files, $dirs);
 	}
 	
 	static function cmp($a, $b) {
@@ -259,9 +280,9 @@ class DirList {
 		return $string;
 	}
 
-	function file_list() {
+	function render_file_list() {
 		// Get list of files and directories
-		list($files, $dirs) = $this->list_dir();
+		list($code, $files, $dirs) = $this->list_dir();
 		$modifier="";
 		$ihighlight=0;
 		
@@ -659,9 +680,6 @@ class DirList {
 	}
 
 }
-?>
-
-<?php
 
 /* Functions borrowed from WordPress */
 
@@ -763,12 +781,13 @@ function wpautop($pee, $br = true) {
 function _autop_newline_preservation_helper( $matches ) {
 	return str_replace("\n", "<WPPreserveNewline />", $matches[0]);
 }
-?>
 
-<?php
+
+
 /* Main block */
 
 $ctx = new DirList();
+$ctx->checkValidPath();
 ?>
 
 <!DOCTYPE html>
@@ -1073,7 +1092,7 @@ footer.navbar {
 			<?php } ?>
 			<section id="list">
 				<ul class="list-unstyled">
-						<?php $ctx->file_list();?>
+						<?php $ctx->render_file_list();?>
 				</ul>
 			</section>
 			
