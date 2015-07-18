@@ -12,6 +12,7 @@ base="http://digitalk7.com"
 mindate=date(2013,10,7) # auto-titles implemented
 mindate=date(2013,12,22) # initial microdata for audio track implemented
 mindate=date(2014,2,5) # further microdata, popovers and no more obvious "?play"
+mindate=date(2015,7,18) # fixed a microdata error
 
 def sitemapURL(base,fileName):
 	st = os.stat(fileName)
