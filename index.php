@@ -358,7 +358,7 @@ class DirList {
 
 		// Display list of files
 		if (!empty($files)) {
-			$microdataWrap="itemprop=\"tracks\" itemscope itemtype=\"http://schema.org/MusicRecording\"";
+			$microdataWrap='itemprop="tracks" itemscope itemtype="http://schema.org/MusicRecording"';
 			$microdataPlay='itemprop="audio"';
 			$microdataGet='itemprop="offers"';
 			foreach ($files as $file) {
@@ -400,8 +400,8 @@ class DirList {
 
 				if (strpos($mime,'audio')!==FALSE) {
 					$audio=TRUE;
-					$icon="<span class=\"glyphicon glyphicon-volume-up\"></span>";
-					$microdataWrap="itemprop=\"tracks\" itemscope itemtype=\"http://schema.org/MusicRecording\"";
+					$icon='<span class="glyphicon glyphicon-volume-up"></span>';
+					$microdataWrap='itemprop="tracks" itemscope itemtype="http://schema.org/MusicRecording"';
 					$microdataPlay='itemprop="audio"';
 					$microdataGet='itemprop="offers"';
 					$play="?play";
@@ -431,7 +431,7 @@ class DirList {
 					$filename);
 				if ($desc==$filename) {
 					$desc=preg_replace('/^(\d+) (.*)(\..*)/',
-						'<span class="track">$1</span> <span itemprop=\"name\">$2</span><span class="extension">$3</span>',
+						'<span class="track">$1</span> <span itemprop="name">$2</span><span class="extension">$3</span>',
 						$filename);
 				}
 
