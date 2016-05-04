@@ -1484,7 +1484,13 @@ footer .qrcode {
 								.append($('<textarea/>').addClass('snippet')
 									.attr('readonly','readonly')
 									.focus(function() {
-										$(this).select();
+										$(this)[0].setSelectionRange(0,99999);
+									})
+									.click(function() {
+										$(this)[0].setSelectionRange(0,99999);
+									})
+									.mouseup(function() {
+										return false;
 									})
 									.text(encodeURI(decodeURI(qualifyURL(target))))
 								)
