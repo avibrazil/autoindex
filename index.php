@@ -825,11 +825,16 @@ $ctx->checkValidPath();
 		?>
     </title>
 
- 			<?php if ($notes_before=$ctx->getMetaVar('notes_before')) { ?>
-				<meta name="description"    content="<?= strip_tags(wpautop($notes_before)) ?>" />
-				<meta name="og:description" content="<?= strip_tags(wpautop($notes_before)) ?>" />
-			<?php } ?>
+	<?php if ($notes_before=$ctx->getMetaVar('notes_before')) { ?>
+		<meta name="description"    content="<?= strip_tags(wpautop($notes_before)) ?>" />
+		<meta name="og:description" content="<?= strip_tags(wpautop($notes_before)) ?>" />
+	<?php } ?>
    
+   
+	<?php if ($folder_image = $ctx->folderImage()) { ?>
+		<meta property="og:image" content="<?= $folder_image ?>" />
+	<?php } ?>
+
     
     <style>
 .breadcrumb > li + li::before {
@@ -871,6 +876,10 @@ footer {
 
 footer.navbar {
     margin-bottom: 0;
+}
+
+footer .qrcode {
+	width:100%;
 }
 
 #list li .name {
@@ -1129,7 +1138,19 @@ footer.navbar {
 	<?php if ($ctx->publicSite) { ?>
 	  <p id="about" class="lead">Digital K7 is a large music collection well organized and tagged. Ready to be browsed, listened and downloaded as never seen before.</p>
       <div class="row">
-      	<div class="col-md-6">
+      	<div class="col-md-4">
+			<section id="infobox_left" class="panel panel-info">
+				<div class="panel-heading"><h4>Bitcoin Donation</h4></div>
+				<div class="panel-body">
+					<p class="subtitle">We work hard to keep DK7 super well organized and free of ads. Please consider a bitcoin donation of any amount to maintain infrastructure.</p>
+					<ul class="list-group">
+						<li class="list-group-item"><a href="bitcoin:1NxyJypgEcWUmH7yPiZRmEjzB1Vih97dxR"><img class="qrcode" src="<?= $ctx->script_location ?>/1NxyJypgEcWUmH7yPiZRmEjzB1Vih97dxR.png"/></a></li>
+						<li class="list-group-item"><p class="text-center"><a href="bitcoin:1NxyJypgEcWUmH7yPiZRmEjzB1Vih97dxR">1NxyJypgEcWUmH7yPiZRmEjzB1Vih97dxR</a></p></li>
+					</ul>
+				</div>
+			</section>
+        </div>
+      	<div class="col-md-4">
 			<section id="infobox_left" class="panel panel-info">
 				<div class="panel-heading"><h4>Social Media</h4></div>
 				<div class="panel-body">
@@ -1141,7 +1162,7 @@ footer.navbar {
 				</div>
 			</section>
         </div>
-		<div class="col-md-6">
+		<div class="col-md-4">
 			<section id="infobox_center" class="panel panel-info">
 				<div class="panel-heading"><h4>About Digital K7</h4></div>
 				<div class="panel-body">
