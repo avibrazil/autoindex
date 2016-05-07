@@ -1,0 +1,18 @@
+{
+  "keypairs": {
+  	/* You can put random keys and values here to use in your template as <?= $ctx->keypairs['keyname'] ?> */
+    "key1": "value1",
+    "key2": "value2"
+  },
+  "instances": {
+  	/* Site instance is detected and lets you take decisions through your template as:
+  	     if ($ctx->instance !== "_default") ..... */
+  	
+    "sitename.com": {
+      "public": true
+    },
+    "_default": {
+      "public": false
+    }
+  }
+}

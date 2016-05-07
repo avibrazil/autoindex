@@ -44,40 +44,63 @@ class DirList {
 	function __construct() {
 		$this->locale = "pt_BR.UTF-8";
 		
-		$this->publicHost = "digitalk7.com";
-		$this->publicHostRoot = "/home/aviram/digitalk7.com/mus";
-		$this->publicHostRootAlias = "/mus";
-
 		$this->userLang        = substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2);
+		
+		# pure URI (/path/to/something) from URL, removing QUERY_STRING ("?var1=x&var2=y")
 		$this->location        = urldecode(str_replace("?" . $_SERVER["QUERY_STRING"], "" ,$_SERVER["REQUEST_URI"]));
-		$this->URL             = $_SERVER["REQUEST_SCHEME"]?$_SERVER["REQUEST_SCHEME"]:"http" . "://" . $_SERVER["HTTP_HOST"] . $this->location;
+		
+		# full URL without QUERY_STRING
+		$this->URL = ($_SERVER["REQUEST_SCHEME"]?$_SERVER["REQUEST_SCHEME"]:"http") .
+				"://" . $_SERVER["HTTP_HOST"] . $this->location;
+		
+		# URI in pieces in an array (/path/to/something -> ["path","to","something"])
 		$this->tokenizedLocation = explode("/",$this->location);
+		
+		# flag is Facebook is reading us
 		$this->isFacebook      = (strpos($_SERVER["HTTP_USER_AGENT"],'facebook')!==FALSE);
-		$this->script_location = str_replace("index.php", "", $_SERVER["PHP_SELF"]); 
+		
+		# URI to this script, without script file name
+		$this->script_location = str_replace("index.php", "", $_SERVER["PHP_SELF"]);
+		
+		# storage path to this script, without script file name (just the folder)
+		$this->script_physical_location = str_replace("index.php", "", $_SERVER["SCRIPT_FILENAME"]);
 
-		if (strpos($_SERVER['SERVER_NAME'],$this->publicHost) !== FALSE) {
-            // if we are on the public host...
-			$this->root = $this->publicHostRoot;
-			$this->rootAlias = $this->publicHostRootAlias;
-			$this->publicSite = TRUE;
+		$this->loadConfig();
+		
+		# Find which site configuration instance we currently are on
+		# comparing the keys on config file with the accesses hostname
+		if (isset($this->instances)) {
+			$__k = array_keys($this->instances);
+			foreach ($__k as $_k) {
+				if (strpos($_SERVER['SERVER_NAME'],$_k) !== FALSE) {
+					$this->instance = $_k;
+				}
+			}
+			
+			if (! isset($this->instance)) {
+				# No instance name match on config file
+				$this->instance = "_default";
+			}
 		} else {
-			$this->root = "/media/Media";
-			$this->rootAlias = "/midia";
-			$this->publicSite = FALSE;
-			
-			$__count=1;
-			
-			$this->publicHostEquivalentURL =
-				"http://" .
-				$this->publicHost .
-				str_replace(
-					$this->rootAlias . "/Musica/",
-					$this->publicHostRootAlias . "/",
-					$this->location,
-					$__count
-				);
+			# No instances are defined
+			$this->instance = "_default";
+			$this->instances[$this->instance] = [];
 		}
+		
+		if (! array_key_exists('root',$this->instances[$this->instance])) {
+			# Set defaults from web server environment
 
+			$this->instances[$this->instance]['public'] = FALSE; # just define some default
+
+			if (array_key_exists('CONTEXT_DOCUMENT_ROOT',$_SERVER)) {
+				$this->instances[$this->instance]['root'] = $_SERVER["CONTEXT_DOCUMENT_ROOT"] . "/";
+				$this->instances[$this->instance]['rootalias'] = $_SERVER["CONTEXT_PREFIX"];
+			} else {
+				$this->instances[$this->instance]['root'] = $_SERVER["DOCUMENT_ROOT"] . "/";
+				$this->instances[$this->instance]['rootalias'] = "/";
+			}
+		}
+		
 		$this->script_path     = DirList::physicalPath($this->script_location); 
 		$this->path            = DirList::physicalPath($this->location);
 
@@ -94,9 +117,9 @@ class DirList {
 	function checkValidPath() {
 		if (! file_exists($this->path)) {
 			header("HTTP/1.0 404 Not Found",false,404);
-			printf("<html><head><title>Not Found: %1$s</title></head>
-					<body><h1>Not Found</h1>%1$s</body></html>",
-				$this->path);
+ 			printf("<html><head><title>Not Found: %1$s</title></head>
+ 					<body><h1>Not Found</h1>%1$s</body></html>",
+ 				$this->path);
 			exit;
 			return 404;
 		} else if (! is_readable($this->path)) {
@@ -170,7 +193,15 @@ class DirList {
 	function physicalPath($l) {
 		$ll=$l;
 
-		$p=str_replace($this->rootAlias,$this->root,$ll);
+		if ($this->instances[$this->instance]['rootalias'] === "/") {
+			$p=$this->instances[$this->instance]['root'] . $ll;
+		} else {
+			$p=str_replace(
+				$this->instances[$this->instance]['rootalias'],
+				$this->instances[$this->instance]['root'],
+				$ll
+			);
+		}
 
 		if ($p === "/") {
 			header("HTTP/1.0 404 Not Found");
@@ -578,6 +609,20 @@ class DirList {
 		$l=$this->getMetaVarLang($v);
 		
 		if ($l) echo "lang=\"$l\"";
+	}
+
+	function loadConfig() {
+		$file=$this->script_physical_location . "config.json";
+		
+		if (file_exists($file)) {
+			$metameta=json_decode(file_get_contents($file),true);
+
+			if (isset($metameta['instances']))
+				$this->instances = $metameta['instances'];
+
+			if (isset($metameta['keypairs']))
+				$this->keypairs = $metameta['keypairs'];
+		}		
 	}
 
 	function loadMeta() {
@@ -1051,7 +1096,7 @@ footer .qrcode {
 
       <section id="sidebar_left" class="pull-left">
       	<div id="sidebar_narrow">
-			<?php if ($ctx->publicSite) { ?>
+			<?php if ($ctx->instance !== "_default") { ?>
 			<div id="main_ad_small" class="ad">
 			  <!-- DK7 Main Vertical -->
 			  <ins class="adsbygoogle" style="display:inline-block;width:120px;height:600px" data-ad-client="ca-pub-6579238986403678" data-ad-slot="9336774654"></ins>
@@ -1071,7 +1116,7 @@ footer .qrcode {
           
           <section id="sidebar_right" class="pull-right">
           	<div id="sidebar_wide">
-				<?php if ($ctx->publicSite) { ?>
+				<?php if ($ctx->instance !== "_default") { ?>
 				<div class="container"><div class="fb-like" data-href="<?= $_SERVER['SCRIPT_URI'] ?>" data-colorscheme="light" data-layout="button_count" data-action="like" data-show-faces="false" data-send="false"></div></div>
 				<?php } ?>
 				<aside id="folder_image">
@@ -1079,7 +1124,7 @@ footer .qrcode {
 						<img src="<?= $folder_image ?>"  class="img-thumbnail img-responsive" />
 					<?php } ?>
 				</aside>
-				<?php if ($ctx->publicSite) { ?>            
+				<?php if ($ctx->instance !== "_default") { ?>
 				<div id="main_ad_large" class="ad">
 				  <!-- DK7 Main Large -->
 				  <ins class="adsbygoogle" style="display:inline-block;width:300px;height:250px" data-ad-client="ca-pub-6579238986403678" data-ad-slot="6383308257"></ins>
@@ -1135,17 +1180,17 @@ footer .qrcode {
     
     
     <footer class="navbar navbar-default navbar-bottom"><div class="container">
-	<?php if ($ctx->publicSite) { ?>
-	  <p id="about" class="lead">Digital K7 is a large music collection well organized and tagged. Ready to be browsed, listened and downloaded as never seen before.</p>
+	<?php if ($ctx->instance !== "_default") { ?>
+	  <p id="about" class="lead"><?= $ctx->keypairs['footermessage'] ?></p>
       <div class="row">
       	<div class="col-md-4">
 			<section id="infobox_left" class="panel panel-info">
 				<div class="panel-heading"><h4>Bitcoin Donation</h4></div>
 				<div class="panel-body">
-					<p class="subtitle">We work hard to keep DK7 super well organized and free of ads. Please consider a bitcoin donation of any amount to maintain infrastructure.</p>
+					<p class="subtitle">We work hard to keep <?= $ctx->keypairs['sitename'] ?> super well organized and free of ads. Please consider a bitcoin donation of any amount to maintain infrastructure.</p>
 					<ul class="list-group">
-						<li class="list-group-item"><a href="bitcoin:1NxyJypgEcWUmH7yPiZRmEjzB1Vih97dxR"><img class="qrcode" src="<?= $ctx->script_location ?>/1NxyJypgEcWUmH7yPiZRmEjzB1Vih97dxR.png"/></a></li>
-						<li class="list-group-item"><p class="text-center"><a href="bitcoin:1NxyJypgEcWUmH7yPiZRmEjzB1Vih97dxR">1NxyJypgEcWUmH7yPiZRmEjzB1Vih97dxR</a></p></li>
+						<li class="list-group-item"><a href="bitcoin:<?= $ctx->keypairs['bitcoin'] ?>"><img class="qrcode" src="<?= $ctx->script_location ?>/<?= $ctx->keypairs['bitcoin'] ?>.png"/></a></li>
+						<li class="list-group-item"><p class="text-center"><a href="bitcoin:<?= $ctx->keypairs['bitcoin'] ?>"><?= $ctx->keypairs['bitcoin'] ?></a></p></li>
 					</ul>
 				</div>
 			</section>
@@ -1156,19 +1201,19 @@ footer .qrcode {
 				<div class="panel-body">
 					<p class="subtitle">Follow us on social media to get updates and musical tips</p>
 					<ul>
-						<li><a href="https://www.facebook.com/digitalk7" target="_new">Facebook</a></li>
-						<li><a href="https://www.facebook.com/pages/K7-Digital/511554182248195" target="_new">Facebook with more Brazilian music tips</a></li>
+						<li><a href="<?= $ctx->keypairs['facebook1'] ?>" target="_new">Facebook</a></li>
+						<li><a href="<?= $ctx->keypairs['facebook2'] ?>" target="_new">Facebook with more Brazilian music tips</a></li>
 					</ul>
 				</div>
 			</section>
         </div>
 		<div class="col-md-4">
 			<section id="infobox_center" class="panel panel-info">
-				<div class="panel-heading"><h4>About Digital K7</h4></div>
+				<div class="panel-heading"><h4>About <?= $ctx->keypairs['sitename'] ?></h4></div>
 				<div class="panel-body">
 				  <ul>
 					<li><a href="/">About</a></li>
-					<li><a href="/download-how-to">How to download media from Digital K7</a></li>
+					<li><a href="/download-how-to">How to download media from <?= $ctx->keypairs['sitename'] ?></a></li>
 					<li><a href="/organization">How the collection is organized</a></li>
 				  </ul>
 				  <p>Command to <a href="/download-how-to">download this folder and subfolders</a> (paste it on Mac and Linux terminal window or Windows command line):</p>
@@ -1178,13 +1223,12 @@ footer .qrcode {
             				  	$_SERVER["REQUEST_SCHEME"]?$_SERVER["REQUEST_SCHEME"]:"http" . "://" . $_SERVER["HTTP_HOST"] . "/",
             				  	$ctx->URL); ?>
             	  </textarea>
-			  </div>
+				</div>
 			</section>
 		</div>
       </div>
       <?php } ?>
-      <?php if ($ctx->publicSite===FALSE) {?>
-      <p class="lead"><a href="<?php echo $ctx->publicHostEquivalentURL ?>">On public site</a></p>
+	  <?php if ($ctx->instance === "_default") { ?>
       <section class="row" id="page_dynamics">
         <h5 onclick="javascript:toogleDisplayForm()" class="section-title">Admin...</h5>
         <div id="page_dynamics_form">
@@ -1221,7 +1265,7 @@ footer .qrcode {
     </div></footer>
   </body>
 
-	<?php if ($ctx->publicSite===FALSE) { ?>
+	<?php if ($ctx->instance === "_default") { ?>
     <script type="text/javascript" id="internals-js">
 		function toogleDisplayForm() {
 			if ($('#page_dynamics_form').css('display') == 'none') {
@@ -1584,7 +1628,7 @@ footer .qrcode {
     </script>
 
 
-	<?php if ($ctx->publicSite) { ?>
+	<?php if ($ctx->instance !== "_default") { ?>
 	<script id="google_analytics_block">
 			(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
 			(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
