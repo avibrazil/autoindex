@@ -457,11 +457,11 @@ class DirList {
 				
 				$filename=DirList::revertSpecialChars($filename);
 				
-				$desc=preg_replace('/^(\d+) (.*) ♫ (.*)(\..*)/',
+				$desc=preg_replace('/^([0-9]*·?[0-9]+|[0-9]+) (.*) ♫ (.*)(\..*)/',
 					'<span class="track">$1</span> <span class="artist" itemprop="accountablePerson">$2</span> <span class="separator">♫</span> <span class="song" itemprop="name">$3</span><span class="extension">$4</span>',
 					$filename);
 				if ($desc==$filename) {
-					$desc=preg_replace('/^(\d+) (.*)(\..*)/',
+					$desc=preg_replace('/^([0-9]*·?[0-9]+|[0-9]+) (.*)(\..*)/',
 						'<span class="track">$1</span> <span itemprop="name">$2</span><span class="extension">$3</span>',
 						$filename);
 				}
