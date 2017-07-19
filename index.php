@@ -1202,7 +1202,6 @@ footer .qrcode {
 					<p class="subtitle">Follow us on social media to get updates and musical tips</p>
 					<ul>
 						<li><a href="<?= $ctx->keypairs['facebook1'] ?>" target="_new">Facebook</a></li>
-						<li><a href="<?= $ctx->keypairs['facebook2'] ?>" target="_new">Facebook with more Brazilian music tips</a></li>
 					</ul>
 				</div>
 			</section>
