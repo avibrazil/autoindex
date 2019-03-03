@@ -240,7 +240,7 @@ class DirList {
 
 
 	/**
-	 * Prepare an array of files and directories to be rendered later by file_list()
+	 * Prepare an array of files and directories to be rendered later by render_file_list()
 	 */
 	function list_dir() {
 		$files = array();
@@ -258,9 +258,13 @@ class DirList {
 			);
 
 			if (is_link($full_path)) $e["link"]=readlink($full_path);
-			else $e["link"]=str_replace("%", "%25", $e["name"]);
-			
-			if (is_dir($full_path) && $full_path != $this->script_path) {				
+			else {
+				# Put here any HTML safety conversion needed for the link
+				
+				$e["link"]=str_replace("%", "%25", $e["name"]);
+				$e["link"]=str_replace("+", "%2B", $e["name"]);
+			}
+			if (is_dir($full_path) && $full_path != $this->script_path) {
 				$dirs[] = $e;
 			}
 			
@@ -488,7 +492,7 @@ class DirList {
 		}
 	}
 
-	function renderRelatedFormItem($uri,$text) {
+	function renderRelatedFormItem($uri="", $text="") {
 		$t="<div class=\"row from-group related_group\">";
 		$t.="<div class=\"col-md-3\"><input type=\"text\" class=\"form-control uri in\" value=\"" . $uri . "\"></div>";
 		$t.="<div class=\"col-md-8\"><input type=\"text\" class=\"form-control text in\" value=\"" . $text . "\"></div>";
