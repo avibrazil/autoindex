@@ -474,11 +474,21 @@ class DirList {
 
 				echo "<li id=\"main-list-$ihighlight\" class=\" file $modifier\" data-mimetype=\"$mime\" data-type=\"file\" data-subtype=\"$modifier\" data-index=\"$ihighlight\" data-target=\"$url\" data-name=\"$filename\" data-size=\"" . $file["size"] . "\">";
 				echo "<span class=\"item\" $microdataWrap >\n";
-				echo "<span class=\"icon\" $microdataPlay ><a href=\"$url\" title=\"click to download\" \">$icon</a></span>";
+				echo "<span class=\"icon\" $microdataPlay >";
+				if (!isset($this->meta['download']) || $this->meta['download']!=False) echo "<a href=\"$url\" title=\"click to download\" \">";
+				echo "$icon";
+				if (!isset($this->meta['download']) || $this->meta['download']!=False) echo "</a>";
+				echo "</span>";
 //				echo "$actions";
-				echo "<span class=\"name\" $microdataGet ><a href=\"$url\" title=\"click to download file\">$desc</a></span> ";
+				echo "<span class=\"name\" $microdataGet >";
+				if (!isset($this->meta['download']) || $this->meta['download']!=False) echo "<a href=\"$url\" title=\"click to download file\" \">";
+				echo "$desc";
+				if (!isset($this->meta['download']) || $this->meta['download']!=False) echo "</a>";
+				echo "</span> ";
 				echo "<small class=\"text-muted\">$size</small>";
-				echo "</span> <a class=\"popover-trigger\" title=\"Options for item\"><span class=\"glyphicon glyphicon-circle-arrow-right\"></span></a></li>\n";
+				echo "</span> ";
+				if (!isset($this->meta['download']) || $this->meta['download']!=False) echo "<a class=\"popover-trigger\" title=\"Options for item\"><span class=\"glyphicon glyphicon-circle-arrow-right\"></span></a>";
+				echo "</li>\n";
 	/*
 				echo "<span class=\"list-group-item file $modifier\">\n";
 				echo "<a href=\"$url" . ((strpos($mime,'audio')!==FALSE) ? "?play" : "") . "\"><span class=\"glyphicon glyphicon-play\"></span></a>\n";
@@ -649,6 +659,9 @@ class DirList {
 
 			if (isset($metameta['related']))
 				$this->meta['related']       = $metameta['related'];
+			
+			if (isset($metameta['download']))
+				$this->meta['download']      = $metameta['download'];
 		}
 	}
 
