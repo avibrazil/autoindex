@@ -12,7 +12,7 @@ RewriteRule ^.*\.(mp3|m4a|mp4|m4v|mov|mkv|mpg|avi|mka|flac|ogg)$ - [E=media:1]
 # Convert hot link into highlighted file on parent folder page
 RewriteCond %{ENV:media} =1
 #RewriteCond expr "! %{HTTP_REFERER} -strcmatch '*://%{HTTP_HOST}*'"
-RewriteCond %{HTTP_REFERER} !^http://DigitalK7\.com.* [NC]
+RewriteCond %{HTTP_REFERER} !^https://DigitalK7\.alkalay\.net.* [NC]
 RewriteCond %{HTTP_USER_AGENT} !^AppleCoreMedia.*
 RewriteCond %{HTTP_USER_AGENT} !^.*Googlebot.*
 RewriteRule ^(.*)/(.*\..*)$ $1/?rehili=$2 [QSA,R]
@@ -94,7 +94,7 @@ class DirList {
 
 			if (array_key_exists('CONTEXT_DOCUMENT_ROOT',$_SERVER)) {
 				$this->instances[$this->instance]['root'] = $_SERVER["CONTEXT_DOCUMENT_ROOT"] . "/";
-				$this->instances[$this->instance]['rootalias'] = $_SERVER["CONTEXT_PREFIX"];
+				$this->instances[$this->instance]['rootalias'] = empty($_SERVER["CONTEXT_PREFIX"])?"/":$_SERVER["CONTEXT_PREFIX"];
 			} else {
 				$this->instances[$this->instance]['root'] = $_SERVER["DOCUMENT_ROOT"] . "/";
 				$this->instances[$this->instance]['rootalias'] = "/";
@@ -118,15 +118,15 @@ class DirList {
 		if (! file_exists($this->path)) {
 			header("HTTP/1.0 404 Not Found",false,404);
  			printf("<html><head><title>Not Found: %1$s</title></head>
- 					<body><h1>Not Found</h1>%1$s</body></html>",
- 				$this->path);
+ 					<body><h1>Not Found</h1>%2$s</body></html>",
+ 				$this->path, $this->path);
 			exit;
 			return 404;
 		} else if (! is_readable($this->path)) {
 			header("HTTP/1.0 403 No Access",false,403);
 			printf("<html><head><title>No Access: %1$s</title></head>
-					<body><h1>No Access</h1>%1$s</body></html>",
-				$this->path);
+					<body><h1>No Access</h1>%2$s</body></html>",
+				$this->path, $this->path);
 			exit;
 			return 403;
 		}
